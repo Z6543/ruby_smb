@@ -1619,11 +1619,13 @@ RSpec.describe RubySMB::Client do
           expect(smb1_client.os_version).to eq '6.1.7601'
         end
 
-        it 'stores the user ID if the status code is \'STATUS_SUCCESS\'' do
+        it 'stores the user ID from the final response packet if the status code is \'STATUS_SUCCESS\'' do
+          # Session UID must come from the final response, not the challenge (Samba reassigns it on success).
           response_packet.smb_header.uid = user_id
+          final_response_packet.smb_header.uid = user_id + 1
           final_response_packet.smb_header.nt_status = WindowsError::NTStatus::STATUS_SUCCESS.value
           smb1_client.smb1_authenticate
-          expect(smb1_client.user_id).to eq user_id
+          expect(smb1_client.user_id).to eq user_id + 1
         end
 
         it 'does not store the user ID if the status code is not \'STATUS_SUCCESS\'' do

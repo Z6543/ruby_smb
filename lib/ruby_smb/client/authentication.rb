@@ -99,7 +99,8 @@ module RubySMB
         response = smb1_ntlmssp_final_packet(raw)
         response_code = response.status_code
 
-        @user_id = user_id if response_code == WindowsError::NTStatus::STATUS_SUCCESS
+        # Use the UID from the final response (some servers, e.g. Samba, reassign it on success).
+        @user_id = response.smb_header.uid if response_code == WindowsError::NTStatus::STATUS_SUCCESS
 
         response_code
       end
